@@ -17,7 +17,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 
 public class AdminController {
 
@@ -42,8 +42,8 @@ public class AdminController {
                             request.getPassword()
                     )
             );
-        } catch (BadCredentialsException e) {
-            System.out.println("BadCredentialsException");
+        } catch (Exception e) {
+            System.out.println("BadCredentialsException"+e);
             throw new Exception("INVALID_CREDENTIALS", e);
         }
         System.out.println("222");
@@ -54,6 +54,11 @@ public class AdminController {
                 jwtUtility.generateToken(userDetails);
 
         return ResponseEntity.ok(new JwtResponse(token));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> saveUser(@RequestBody CustomUserDTO user) throws Exception {
+        return ResponseEntity.ok(userService.save(user));
     }
 
     @PostMapping("/create_survey")

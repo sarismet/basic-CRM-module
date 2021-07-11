@@ -1,17 +1,22 @@
 package com.layermark.layermark_sarismet.controller;
 
 import com.layermark.layermark_sarismet.model.CustomUserDTO;
+import com.layermark.layermark_sarismet.model.UserRole;
 import com.layermark.layermark_sarismet.security.JWTUtility;
 import com.layermark.layermark_sarismet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/endUser")
+@RequestMapping("/api/endUser")
 public class EndUserController {
 
     @Autowired
@@ -24,18 +29,19 @@ public class EndUserController {
     private UserService userService;
 
     @GetMapping("/home")
-    public String hello(){
-        return "hello from server side!";
-    }
-
-    @PostMapping("/login")
-    public String login(@RequestBody Map<String, String> options){
-        return "login is done!";
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<?> saveUser(@RequestBody CustomUserDTO user) throws Exception {
-        return ResponseEntity.ok(userService.save(user));
+    public String hello(Authentication authentication){
+        boolean isUser = false;
+        for (GrantedAuthority ga : authentication.getAuthorities()) {
+            System.out.println("ga.getAuthority() "+ ga.getAuthority());
+            if (ga.getAuthority().equals("ROLE_USER")){
+                isUser = true;
+                break;
+            }
+        }
+        if (isUser) {
+            return "you are a user";
+        }
+        return "you are not a user";
     }
 
     @PostMapping("/submit_opinion/survey_id={_survey_id}&options_id={_options_id}")
