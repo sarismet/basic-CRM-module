@@ -11,5 +11,4 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<CustomUser, Long> {
     CustomUser findByUsername(String username);
-
 }

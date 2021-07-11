@@ -5,6 +5,7 @@ import com.layermark.layermark_sarismet.model.CustomUserDTO;
 import com.layermark.layermark_sarismet.model.JwtRequest;
 import com.layermark.layermark_sarismet.model.JwtResponse;
 import com.layermark.layermark_sarismet.security.JWTUtility;
+import com.layermark.layermark_sarismet.service.SurveyService;
 import com.layermark.layermark_sarismet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,19 +18,27 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
     private JWTUtility jwtUtility;
-
-    @Autowired
     private AuthenticationManager authenticationManager;
+    private UserService userService;
 
     @Autowired
-    private UserService userService;
+    public void setJwtUtility(JWTUtility jwtUtility) {
+        this.jwtUtility = jwtUtility;
+    }
+
+    @Autowired
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
+
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/auth_user")
     public ResponseEntity<?> authenticate(@RequestBody JwtRequest request) throws Exception{
-
-        System.out.println("111");
 
         try {
             authenticationManager.authenticate(
@@ -39,10 +48,9 @@ public class AuthController {
                     )
             );
         } catch (Exception e) {
-            System.out.println("BadCredentialsException"+e);
             throw new Exception("INVALID_CREDENTIALS", e);
         }
-        System.out.println("222");
+
         final UserDetails userDetails
                 = userService.loadUserByUsername(request.getUsername());
 

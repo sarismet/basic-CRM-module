@@ -1,84 +1,74 @@
 package com.layermark.layermark_sarismet.controller;
 
+import com.layermark.layermark_sarismet.model.Answer;
 import com.layermark.layermark_sarismet.model.CustomUserDTO;
-import com.layermark.layermark_sarismet.model.JwtRequest;
-import com.layermark.layermark_sarismet.model.JwtResponse;
 import com.layermark.layermark_sarismet.model.Survey;
 import com.layermark.layermark_sarismet.security.JWTUtility;
+import com.layermark.layermark_sarismet.service.AnswerService;
+import com.layermark.layermark_sarismet.service.SurveyService;
 import com.layermark.layermark_sarismet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.authentication.AuthenticationManager;
 
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
 
 public class AdminController {
 
-    @Autowired
     private JWTUtility jwtUtility;
-
-    @Autowired
     private AuthenticationManager authenticationManager;
+    private SurveyService surveyService;
+    private UserService userService;
+    private AnswerService answerService;
 
     @Autowired
-    private UserService userService;
-
-    @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticate(@RequestBody JwtRequest request) throws Exception{
-
-        System.out.println("111");
-
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword()
-                    )
-            );
-        } catch (Exception e) {
-            System.out.println("BadCredentialsException"+e);
-            throw new Exception("INVALID_CREDENTIALS", e);
-        }
-        System.out.println("222");
-        final UserDetails userDetails
-                = userService.loadUserByUsername(request.getUsername());
-
-        final String token =
-                jwtUtility.generateToken(userDetails);
-
-        return ResponseEntity.ok(new JwtResponse(token));
+    public void setJwtUtility(JWTUtility jwtUtility) {
+        this.jwtUtility = jwtUtility;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> saveUser(@RequestBody CustomUserDTO user) throws Exception {
-        return ResponseEntity.ok(userService.save(user));
+    @Autowired
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
-    @PostMapping("/create_survey")
-    public String createSurvey(@RequestBody Map<String, String> options){
-        return "createSurvey is done!";
+    @Autowired
+    public void setSurveyService(SurveyService surveyService) {
+        this.surveyService = surveyService;
     }
 
-    @PutMapping("/update_survey/id={_id}")
-    public String updateSurvey(@RequestBody Survey survey, @PathVariable("_id") String id){
-        return "updateSurvey is done!";
+    @Autowired
+    public void setAnswerService(AnswerService answerService) {
+        this.answerService = answerService;
+    }
+
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping("/newSurvey")
+    public Survey createSurvey(@RequestBody Survey a) {
+        return surveyService.createSurvey(a);
     }
 
     @PostMapping("/create_users")
-    public String createUsers(@RequestBody Map<String, String> options){
-        return "createUsers is done!";
+    public ResponseEntity<?>  createUsers(@RequestBody CustomUserDTO user) throws Exception {
+        return ResponseEntity.ok(userService.save(user));
     }
 
-    @DeleteMapping("/delete_survey/id={_id}")
-    public String deleteSurvey(@PathVariable("_id") String id){
-        return "deleteSurvey is done!";
+    @PutMapping("/update_survey/id={_id}")
+    public Survey updateSurveyById(@RequestBody Survey survey,@PathVariable("_id") String id) {return surveyService.updateSurvey(survey,id);}
+
+    @DeleteMapping("/delete_survey/id={id}")
+    public void deleteSurveyById(@PathVariable("id") String id){  surveyService.deleteSurvey(id);}
+
+    @GetMapping("/get_survey_results")
+    public List<Answer> getResults(){
+        return answerService.analyzeAnswers();
     }
 
     @GetMapping("/home")

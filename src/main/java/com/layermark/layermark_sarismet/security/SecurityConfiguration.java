@@ -20,18 +20,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
+    //Here we could use this approach: https://stackoverflow.com/a/42191609/1010619 instead of this kind of Autowired.
     @Autowired
-    private UserDetailsService jwtUserDetailsService;
+    private  UserDetailsService jwtUserDetailsService;
 
-    @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    public void setJwtAuthenticationEntryPoint(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint){
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+    }
 
+    @Autowired
+    public void setJwtRequestFilter(JwtRequestFilter jwtRequestFilter){
+        this.jwtRequestFilter = jwtRequestFilter;
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(jwtUserDetailsService).passwordEncoder(encoder());
     }
 
@@ -48,16 +55,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        // We don't need CSRF for this example
         httpSecurity.csrf().disable()
                 .authorizeRequests().antMatchers("/auth/**").permitAll().
                 anyRequest().authenticated().and().
                 exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
-
-
-
     }
 }

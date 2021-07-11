@@ -1,19 +1,12 @@
 package com.layermark.layermark_sarismet.model;
 
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 public class JwtRequest {
     private String username;
     private String password;
     private String email;
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public JwtRequest(String username,String email, String password) {
         this.username = username;
@@ -38,5 +31,9 @@ public class JwtRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
