@@ -1,14 +1,15 @@
 package com.layermark.layermark_sarismet.controller;
 
+import com.layermark.layermark_sarismet.model.CustomUserDTO;
+import com.layermark.layermark_sarismet.model.JwtRequest;
+import com.layermark.layermark_sarismet.model.JwtResponse;
 import com.layermark.layermark_sarismet.model.Survey;
-import com.layermark.layermark_sarismet.model.User;
 import com.layermark.layermark_sarismet.security.JWTUtility;
 import com.layermark.layermark_sarismet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,26 +31,29 @@ public class AdminController {
     private UserService userService;
 
     @PostMapping("/authenticate")
-    public String authenticate() throws Exception{
+    public ResponseEntity<?> authenticate(@RequestBody JwtRequest request) throws Exception{
+
+        System.out.println("111");
 
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            "ismet",
-                            "sari"
+                            request.getUsername(),
+                            request.getPassword()
                     )
             );
         } catch (BadCredentialsException e) {
+            System.out.println("BadCredentialsException");
             throw new Exception("INVALID_CREDENTIALS", e);
         }
-
+        System.out.println("222");
         final UserDetails userDetails
-                = userService.loadUserByUsername("ismet");
+                = userService.loadUserByUsername(request.getUsername());
 
         final String token =
                 jwtUtility.generateToken(userDetails);
 
-        return token;
+        return ResponseEntity.ok(new JwtResponse(token));
     }
 
     @PostMapping("/create_survey")

@@ -13,10 +13,4 @@ public class LayermarkSarismetApplication {
 		SpringApplication.run(LayermarkSarismetApplication.class, args);
 	}
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return NoOpPasswordEncoder.getInstance();
-	}
-
-
 }

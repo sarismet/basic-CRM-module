@@ -1,5 +1,11 @@
 package com.layermark.layermark_sarismet.controller;
 
+import com.layermark.layermark_sarismet.model.CustomUserDTO;
+import com.layermark.layermark_sarismet.security.JWTUtility;
+import com.layermark.layermark_sarismet.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -7,6 +13,15 @@ import java.util.Map;
 @RestController
 @RequestMapping("/endUser")
 public class EndUserController {
+
+    @Autowired
+    private JWTUtility jwtUtility;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/home")
     public String hello(){
@@ -19,8 +34,8 @@ public class EndUserController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody Map<String, String> options){
-        return "register is done!";
+    public ResponseEntity<?> saveUser(@RequestBody CustomUserDTO user) throws Exception {
+        return ResponseEntity.ok(userService.save(user));
     }
 
     @PostMapping("/submit_opinion/survey_id={_survey_id}&options_id={_options_id}")
