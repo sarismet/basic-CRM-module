@@ -2,6 +2,9 @@ package com.layermark.layermark_sarismet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
 public class LayermarkSarismetApplication {
@@ -9,5 +12,11 @@ public class LayermarkSarismetApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(LayermarkSarismetApplication.class, args);
 	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return NoOpPasswordEncoder.getInstance();
+	}
+
 
 }

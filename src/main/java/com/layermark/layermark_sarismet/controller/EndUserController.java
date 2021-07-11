@@ -8,6 +8,11 @@ import java.util.Map;
 @RequestMapping("/endUser")
 public class EndUserController {
 
+    @GetMapping("/home")
+    public String hello(){
+        return "hello from server side!";
+    }
+
     @PostMapping("/login")
     public String login(@RequestBody Map<String, String> options){
         return "login is done!";

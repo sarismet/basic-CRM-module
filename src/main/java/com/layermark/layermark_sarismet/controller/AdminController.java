@@ -72,7 +72,7 @@ public class AdminController {
         return "deleteSurvey is done!";
     }
 
-    @GetMapping("/")
+    @GetMapping("/home")
     public String hello(){
         return "hello from server side!";
     }
