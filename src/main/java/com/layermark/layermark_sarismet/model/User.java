@@ -1,33 +1,71 @@
 package com.layermark.layermark_sarismet.model;
 
-public class User {
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.Collections;
+
+public class User implements UserDetails {
 
     private String id;
     private String username ;
     private String password ;
     private String email ;
-    private boolean isAdmin ;
+    private UserRole userRole;
 
     public String getId() {
         return id;
+    }
+
+    private Collection<? extends GrantedAuthority> authorities;
+
+    public User(String username,
+                   String email,
+                   String password,
+                UserRole userRole,
+                Collection<? extends GrantedAuthority> authorities) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.userRole = userRole;
+        this.authorities = authorities;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority authority =
+                new SimpleGrantedAuthority(userRole.name());
+        return Collections.singletonList(authority);
+    }
+    @Override
+    public String getPassword() {
+        return null;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public String getEmail() {
-        return email;
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
     }
 
-    public boolean getIsAdmin() {
-        return isAdmin;
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
     }
 
-    public User() {
+    @Override
+    public boolean isEnabled() {
+        return false;
     }
+
 }
