@@ -1,10 +1,13 @@
 package com.layermark.layermark_sarismet.controller;
 
 import com.layermark.layermark_sarismet.model.Answer;
+import com.layermark.layermark_sarismet.model.ChangePasswordRequest;
 import com.layermark.layermark_sarismet.model.Survey;
 import com.layermark.layermark_sarismet.security.JWTUtility;
 import com.layermark.layermark_sarismet.service.AnswerService;
+import com.layermark.layermark_sarismet.service.EmailService;
 import com.layermark.layermark_sarismet.service.SurveyService;
+import com.layermark.layermark_sarismet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +24,9 @@ public class EndUserController {
     private AuthenticationManager authenticationManager;
     private SurveyService surveyService;
     private AnswerService answerService;
+    private EmailService emailService;
+    private UserService userService;
+
     @Autowired
     public void setJwtUtility(JWTUtility jwtUtility) {
         this.jwtUtility = jwtUtility;
@@ -32,8 +38,18 @@ public class EndUserController {
     }
 
     @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    @Autowired
     public void setAnswerService(AnswerService answerService) {
         this.answerService = answerService;
+    }
+
+    @Autowired
+    public void setEmailService(EmailService emailService) {
+        this.emailService = emailService;
     }
 
     @Autowired
@@ -41,9 +57,9 @@ public class EndUserController {
         this.surveyService = surveyService;
     }
 
-    @GetMapping("/id={name}")
-    public Optional<Survey> getSurveyById(@PathVariable("name") String a) {
-        return surveyService.getById(a);
+    @GetMapping("/id={_id}")
+    public Optional<Survey> getSurveyById(@PathVariable("_id") String surveyID) {
+        return surveyService.getSurveyById(surveyID);
     }
 
     @GetMapping
@@ -54,6 +70,11 @@ public class EndUserController {
     @PostMapping("/submit_opinion")
     public Answer submitOpinion(@RequestBody Answer answer){
         return answerService.answerSurvey(answer);
+    }
+
+    @PostMapping("/change_password")
+    public String changePassword(@RequestBody ChangePasswordRequest changePasswordRequest){
+        return userService.changePassword(changePasswordRequest);
     }
 
     @GetMapping("/home")

@@ -1,6 +1,6 @@
 package com.layermark.layermark_sarismet.exception;
 
-import com.layermark.layermark_sarismet.exception.bad_request.SurveyIsAnsweredException;
+import com.layermark.layermark_sarismet.exception.bad_request.*;
 import com.layermark.layermark_sarismet.exception.not_found.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
         return exceptionHandler(HttpStatus.NOT_FOUND, e);
     }
 
-    @ExceptionHandler(SurveyIsAnsweredException.class)
+    @ExceptionHandler({BadRequestException.class,UserIsAlreadyRegisteredException.class, UserEmailNotVerifiedException.class, InvalidCredentialException.class})
     private ResponseEntity<Error> badRequestExceptionHandler( Exception e) {
         return exceptionHandler(HttpStatus.BAD_REQUEST, e);
     }

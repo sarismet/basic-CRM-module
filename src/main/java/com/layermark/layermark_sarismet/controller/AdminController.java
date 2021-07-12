@@ -2,6 +2,7 @@ package com.layermark.layermark_sarismet.controller;
 
 import com.layermark.layermark_sarismet.model.Answer;
 import com.layermark.layermark_sarismet.model.CustomUserDTO;
+import com.layermark.layermark_sarismet.model.NotVerifiedSurvey;
 import com.layermark.layermark_sarismet.model.Survey;
 import com.layermark.layermark_sarismet.security.JWTUtility;
 import com.layermark.layermark_sarismet.service.AnswerService;
@@ -56,15 +57,30 @@ public class AdminController {
     }
 
     @PostMapping("/create_users")
-    public ResponseEntity<?>  createUsers(@RequestBody CustomUserDTO user) throws Exception {
+    public ResponseEntity<?>  createUsers(@RequestBody CustomUserDTO user){
         return ResponseEntity.ok(userService.save(user));
     }
 
-    @PutMapping("/update_survey/id={_id}")
-    public Survey updateSurveyById(@RequestBody Survey survey,@PathVariable("_id") String id) {return surveyService.updateSurvey(survey,id);}
+    @GetMapping("/get_all_not_verified_surveys")
+    public List<NotVerifiedSurvey> getAllNotVerifiedSurveys(){
+        return  surveyService.getNotVerifiedSurveys();
+    }
 
-    @DeleteMapping("/delete_survey/id={id}")
-    public void deleteSurveyById(@PathVariable("id") String id){  surveyService.deleteSurvey(id);}
+    @PutMapping("/verify_not_verified_survey/id={_id}")
+    public Survey verifyNotVerifiedSurvey(@PathVariable("_id") String id){
+        return surveyService.verifyNotVerifiedSurvey(id);
+    }
+
+    @PutMapping("/update_survey/id={_id}")
+    public Survey updateSurveyById(@RequestBody Survey survey,@PathVariable("_id") String id) {
+        return surveyService.updateSurvey(survey,id);
+    }
+
+    @DeleteMapping("/delete_survey/id={_id}")
+    public String deleteSurveyById(@PathVariable("_id") String id){
+        surveyService.deleteSurvey(id);
+        return String.format("Survey with id %s is deleted",id);
+    }
 
     @GetMapping("/get_survey_results")
     public List<Answer> getResults(){
