@@ -1,7 +1,6 @@
 package com.layermark.layermark_sarismet.service;
 
-import com.layermark.layermark_sarismet.exception.bad_request.UserEmailNotVerifiedException;
-import com.layermark.layermark_sarismet.exception.bad_request.UserIsAlreadyRegisteredException;
+import com.layermark.layermark_sarismet.exception.bad_request.BadRequestException;
 import com.layermark.layermark_sarismet.exception.not_found.ResourceNotFoundException;
 import com.layermark.layermark_sarismet.generic.CustomMessageSource;
 import com.layermark.layermark_sarismet.model.UserRole;
@@ -38,6 +37,7 @@ public class UserService implements UserDetailsService {
     private static final String USER_IS_ALREADY_VERIFIED = "error.user-is-already-verified";
     private static final String USER_EMAIL_IS_NOT_VERIFIED = "error.user-email-is-not-verified";
     private static final String NEW_PASSWORD_DOES_NOT_MATCH = "error.password-does-not-match";
+    private static final String USERNAME_ADMIN_CANNOT_BE_TAKEN= "error.username-admin";
 
     @Value("${spring.token.expired.time}")
     private long tokenExpiredTime;
@@ -65,12 +65,11 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         CustomUser user = userRepository.findByUsername(username);
-        System.out.println("VERIFIED MI "+user.getVerified());
         if (user == null) {
             throw new ResourceNotFoundException(messageSource.getMessage(USER_NOT_FOUND));
         }
         if (!user.getVerified()) {
-            throw new UserEmailNotVerifiedException(messageSource.getMessage(USER_EMAIL_IS_NOT_VERIFIED));
+            throw new BadRequestException(messageSource.getMessage(USER_EMAIL_IS_NOT_VERIFIED));
         }
         List<SimpleGrantedAuthority> roles = null;
         if (user.getRole().equals("ADMIN")) {
@@ -88,17 +87,20 @@ public class UserService implements UserDetailsService {
             CustomUser newUser = new CustomUser();
             newUser.setUsername(user.getUsername());
             newUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            newUser.setRole(UserRole.ADMIN.name());
+            newUser.setRole(UserRole.BASIC.name());
             newUser.setEmail(user.getEmail());
             newUser.setVerified(false);
             return userRepository.save(newUser);
         }
         else{
-            throw new UserIsAlreadyRegisteredException(messageSource.getMessage(USER_IS_ALREADY_REGISTERED));
+            throw new BadRequestException(messageSource.getMessage(USER_IS_ALREADY_REGISTERED));
         }
     }
 
     public String registerUser(HttpServletRequest request, CustomUserDTO user) {
+        if(user.getUsername().equals("admin")||user.getUsername().equals("ADMIN")){
+            throw new BadRequestException(messageSource.getMessage(USERNAME_ADMIN_CANNOT_BE_TAKEN));
+        }
         this.save(user);
         emailService.sendEmail(request,user.getUsername());
         return messageSource.getMessage(EMAIL_IS_SENT);
@@ -112,8 +114,6 @@ public class UserService implements UserDetailsService {
             }
             String userID = customUser.getUserID();
             String username = customToken.getUsername();
-            System.out.println(" username VERIFY "+username);
-            System.out.println(" getTimestamp VERIFY "+customToken.getTimestamp());
             Date nw = new Date();
             long milliseconds = nw.getTime();
             if ((milliseconds - customToken.getTimestamp())>tokenExpiredTime){
@@ -123,7 +123,7 @@ public class UserService implements UserDetailsService {
             customUser.setVerified(true);
             userRepository.save(customUser);
         }else{
-            throw new UserIsAlreadyRegisteredException(messageSource.getMessage(USER_NOT_FOUND));
+            throw new BadRequestException(messageSource.getMessage(USER_NOT_FOUND));
         }
         return messageSource.getMessage(USER_IS_SUCCESSFULLY_REGISTERED);
     }
@@ -138,10 +138,10 @@ public class UserService implements UserDetailsService {
                 customUser.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
                 userRepository.save(customUser);
             }else{
-                throw new UserIsAlreadyRegisteredException(messageSource.getMessage(NEW_PASSWORD_DOES_NOT_MATCH));
+                throw new BadRequestException(messageSource.getMessage(NEW_PASSWORD_DOES_NOT_MATCH));
             }
         }else{
-            throw new UserIsAlreadyRegisteredException(messageSource.getMessage(USER_NOT_FOUND));
+            throw new BadRequestException(messageSource.getMessage(USER_NOT_FOUND));
         }
         return "";
     }

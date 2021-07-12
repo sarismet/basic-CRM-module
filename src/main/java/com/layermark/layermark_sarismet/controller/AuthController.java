@@ -1,15 +1,13 @@
 package com.layermark.layermark_sarismet.controller;
 
 
-import com.layermark.layermark_sarismet.exception.bad_request.InvalidCredentialException;
-import com.layermark.layermark_sarismet.exception.bad_request.UserEmailNotVerifiedException;
+import com.layermark.layermark_sarismet.exception.bad_request.BadRequestException;
 import com.layermark.layermark_sarismet.model.CustomUserDTO;
 import com.layermark.layermark_sarismet.model.JwtRequest;
 import com.layermark.layermark_sarismet.model.JwtResponse;
 import com.layermark.layermark_sarismet.security.JWTUtility;
 import com.layermark.layermark_sarismet.service.CryptoService;
 import com.layermark.layermark_sarismet.service.EmailService;
-import com.layermark.layermark_sarismet.service.SurveyService;
 import com.layermark.layermark_sarismet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +65,7 @@ public class AuthController {
                     )
             );
         } catch (AuthenticationException e) {
-            throw new InvalidCredentialException(e.getMessage());
+            throw new BadRequestException(e.getMessage());
         }
 
         final UserDetails userDetails
@@ -84,14 +82,15 @@ public class AuthController {
         return ResponseEntity.ok(userService.registerUser(request,user));
     }
 
-    @GetMapping("/register_verification/token={_token}")
-    public ResponseEntity<?> registerVerification(@PathVariable("_token") String token) {
-        System.out.println("registerVerificationregisterVerificationregisterVerificationregisterVerification");
+    @GetMapping("/register_verification/**")
+    public ResponseEntity<?> registerVerification(HttpServletRequest request){
+        String url = request.getRequestURL().toString();
+        String token = url.substring(url.indexOf("=") + 1);
         return ResponseEntity.ok(userService.verifyUser(cryptoService.decryptText(token)));
     }
 
     @GetMapping("/home")
-    public String hello(){
+    public String hello(HttpServletRequest request){
         return "hello from server side!";
     }
 

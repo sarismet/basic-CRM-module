@@ -41,7 +41,7 @@ public class EmailService {
         System.out.println("encryptedToken "+encryptedToken);
 
         String link = baseUrl+"/auth/register_verification/token="+encryptedToken;
-        String mainBodyText =  String.format("Hello World %s \\n We have received your sign up request. Please click the link below to verify your email\\n Click link to verify %s", username,link); // String value
+        String mainBodyText =  String.format("Hello World %s \nWe have received your sign up request. Please click the link below to verify your email \nClick link to verify %s", username,link); // String value
         msg.setSubject("Email Verification");
         msg.setText(mainBodyText);
         javaMailSender.send(msg);

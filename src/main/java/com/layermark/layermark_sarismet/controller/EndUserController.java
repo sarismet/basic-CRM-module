@@ -2,6 +2,7 @@ package com.layermark.layermark_sarismet.controller;
 
 import com.layermark.layermark_sarismet.model.Answer;
 import com.layermark.layermark_sarismet.model.ChangePasswordRequest;
+import com.layermark.layermark_sarismet.model.NotVerifiedSurvey;
 import com.layermark.layermark_sarismet.model.Survey;
 import com.layermark.layermark_sarismet.security.JWTUtility;
 import com.layermark.layermark_sarismet.service.AnswerService;
@@ -60,6 +61,11 @@ public class EndUserController {
     @GetMapping("/id={_id}")
     public Optional<Survey> getSurveyById(@PathVariable("_id") String surveyID) {
         return surveyService.getSurveyById(surveyID);
+    }
+
+    @PostMapping("/create_not_verified_survey")
+    public NotVerifiedSurvey createNotVerifiedSurvey(@RequestBody NotVerifiedSurvey notVerifiedSurvey){
+        return surveyService.createNotVerifiedSurvey(notVerifiedSurvey);
     }
 
     @GetMapping

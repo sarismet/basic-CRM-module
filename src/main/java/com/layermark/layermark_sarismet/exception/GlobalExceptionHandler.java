@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
         return exceptionHandler(HttpStatus.NOT_FOUND, e);
     }
 
-    @ExceptionHandler({BadRequestException.class,UserIsAlreadyRegisteredException.class, UserEmailNotVerifiedException.class, InvalidCredentialException.class})
+    @ExceptionHandler({BadRequestException.class})
     private ResponseEntity<Error> badRequestExceptionHandler( Exception e) {
         return exceptionHandler(HttpStatus.BAD_REQUEST, e);
     }

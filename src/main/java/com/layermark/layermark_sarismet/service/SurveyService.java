@@ -43,7 +43,7 @@ public class SurveyService {
         return surveyRepository.insert(survey);
     }
 
-    public Survey createNotVerifiedSurvey(NotVerifiedSurvey notVerifiedSurvey) {
+    public NotVerifiedSurvey createNotVerifiedSurvey(NotVerifiedSurvey notVerifiedSurvey) {
         return notVerifiedSurveyRepository.insert(notVerifiedSurvey);
     }
 
