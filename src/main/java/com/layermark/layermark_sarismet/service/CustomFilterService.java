@@ -24,7 +24,8 @@ public class CustomFilterService {
     public void setMessageSource(CustomMessageSource messageSource) {
         this.messageSource = messageSource;
     }
-    public void checkUserNameMatch(HttpServletRequest request,String username){
+
+    public void checkUserNameMatch(HttpServletRequest request, String username) {
         final String requestTokenHeader = request.getHeader("Authorization");
         String usernameFromToken = null;
         String jwtToken = null;
@@ -32,17 +33,15 @@ public class CustomFilterService {
             jwtToken = requestTokenHeader.substring(7);
             try {
                 usernameFromToken = jwtTokenUtil.getUsernameFromToken(jwtToken);
-                if(!username.equals(usernameFromToken)){
+                if (!username.equals(usernameFromToken)) {
                     throw new BadRequestException(messageSource.getMessage(USER_NAMES_DO_NOT_MATCH));
                 }
             } catch (IllegalArgumentException e) {
-                System.out.println("Unable to get JWT Token");
                 throw new BadRequestException(messageSource.getMessage(UNABLE_TO_GET_TOKEN));
             } catch (ExpiredJwtException e) {
-                System.out.println("JWT Token has expired");
                 throw new BadRequestException(messageSource.getMessage(TOKEN_EXPIRED));
             }
-        }else{
+        } else {
             throw new BadRequestException(messageSource.getMessage(TOKEN_NOT_VALID));
         }
     }

@@ -49,15 +49,12 @@ public class AnswerService {
     }
 
     public HashMap<String, HashMap<String, Integer>>analyzeAnswers() {
-        System.out.println("analyzeAnswers  analyzeAnswersanalyzeAnswersanalyzeAnswers");
         List<Answer> answers = answerRepository.findAll();
         HashMap<String, HashMap<String, Integer>> analysisReport = new HashMap<>();
         for (Answer answer : answers) {
             HashMap<String, Integer> surveyReport = analysisReport.get(answer.getSurveyID());
             if(surveyReport!= null){
-                System.out.println("answer.getOptionKey()    "+answer.getOptionKey());
                 Integer answerCount = surveyReport.get(answer.getOptionKey());
-                System.out.println("answerCount    "+answerCount);
                 if (answerCount != null){
                     answerCount++;
                     surveyReport.put(answer.getOptionKey(),answerCount);

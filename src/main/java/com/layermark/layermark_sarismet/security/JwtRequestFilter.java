@@ -1,6 +1,5 @@
 package com.layermark.layermark_sarismet.security;
 
-
 import java.io.IOException;
 
 import javax.servlet.FilterChain;
@@ -42,10 +41,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 username = jwtTokenUtil.getUsernameFromToken(jwtToken);
             } catch (IllegalArgumentException e) {
-                System.out.println("Unable to get JWT Token");
                 response.sendError(HttpStatus.BAD_REQUEST.value());
             } catch (ExpiredJwtException e) {
-                System.out.println("JWT Token has expired");
                 response.sendError(HttpStatus.BAD_REQUEST.value());
             }
         } else {
@@ -56,8 +53,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             if (request.getRequestURI().contains("/api/admin/")) {
                 boolean isAdminCheck = false;
                 for (GrantedAuthority ga : userDetails.getAuthorities()) {
-                    System.out.println("GO GO GOI "+ga.getAuthority());
-                    if (ga.getAuthority().equals("ROLE_ADMIN")){
+                    if (ga.getAuthority().equals("ROLE_ADMIN")) {
                         isAdminCheck = true;
                         break;
                     }

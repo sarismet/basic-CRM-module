@@ -27,24 +27,26 @@ public class SurveyService {
     public void setMessageSource(CustomMessageSource messageSource) {
         this.messageSource = messageSource;
     }
+
     @Autowired
     public void setSurveyRepository(SurveyRepository surveyRepository) {
         this.surveyRepository = surveyRepository;
     }
+
     @Autowired
     public void setNotVerifiedSurveyRepository(NotVerifiedSurveyRepository notVerifiedSurveyRepository) {
         this.notVerifiedSurveyRepository = notVerifiedSurveyRepository;
     }
 
     public Survey createSurvey(Survey survey) {
-        if(surveyRepository.findByTopic(survey.getTopic())!=null){
+        if (surveyRepository.findByTopic(survey.getTopic()) != null) {
             throw new BadRequestException(messageSource.getMessage(SURVEY_WITH_THAT_TOPIC_EXISTS));
         }
         return surveyRepository.insert(survey);
     }
 
     public NotVerifiedSurvey createNotVerifiedSurvey(NotVerifiedSurvey notVerifiedSurvey) {
-        if(notVerifiedSurveyRepository.findByTopic(notVerifiedSurvey.getTopic())!=null){
+        if (notVerifiedSurveyRepository.findByTopic(notVerifiedSurvey.getTopic()) != null) {
             throw new BadRequestException(messageSource.getMessage(SURVEY_WITH_THAT_TOPIC_EXISTS));
         }
         return notVerifiedSurveyRepository.insert(notVerifiedSurvey);
@@ -55,14 +57,15 @@ public class SurveyService {
     }
 
     public NotVerifiedSurvey getNotVerifiedSurveyById(String id) {
-        NotVerifiedSurvey NotVerifiedSurvey = notVerifiedSurveyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
+        NotVerifiedSurvey NotVerifiedSurvey = notVerifiedSurveyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
         return NotVerifiedSurvey;
     }
 
     public Survey verifyNotVerifiedSurvey(String id) {
-        NotVerifiedSurvey notVerifiedSurvey = notVerifiedSurveyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
-        System.out.println("notVerifiedSurvey.getTopic()   "+notVerifiedSurvey.getTopic());
-        if(surveyRepository.findByTopic(notVerifiedSurvey.getTopic())!=null){
+        NotVerifiedSurvey notVerifiedSurvey = notVerifiedSurveyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
+        if (surveyRepository.findByTopic(notVerifiedSurvey.getTopic()) != null) {
             throw new BadRequestException(messageSource.getMessage(SURVEY_WITH_THAT_TOPIC_EXISTS));
         }
         Survey survey = surveyRepository.save(notVerifiedSurvey);
@@ -79,8 +82,9 @@ public class SurveyService {
     }
 
     public Survey updateSurvey(Survey survey, String id) {
-        Survey currentSurvey = surveyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
-        if (currentSurvey.isAnswered()){
+        Survey currentSurvey = surveyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
+        if (currentSurvey.isAnswered()) {
             throw new ResourceNotFoundException(messageSource.getMessage(SURVEY_IS_ANSWERED_UPDATE_NOT_ALLOWED));
         }
         currentSurvey.setTopic(survey.getTopic());
@@ -88,8 +92,9 @@ public class SurveyService {
         return surveyRepository.save(currentSurvey);
     }
 
-    public void deleteSurvey(String id){
-        surveyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
+    public void deleteSurvey(String id) {
+        surveyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
         surveyRepository.deleteById(id);
     }
 
