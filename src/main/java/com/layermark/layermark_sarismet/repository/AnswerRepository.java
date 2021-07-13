@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AnswerRepository extends MongoRepository<Answer, String> {
+    Answer findByUsernameAndSurveyID(String username,String surveyID);
 }

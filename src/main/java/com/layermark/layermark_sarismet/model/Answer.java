@@ -10,12 +10,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @ToString
 public class Answer {
     private String surveyID;
-    private String userName;
+    private String username;
     private String optionKey;
 
-    public Answer(String surveyID, String userName, String optionKey) {
+    public Answer(String surveyID, String username, String optionKey) {
         this.surveyID = surveyID;
-        this.userName = userName;
+        this.username = username;
         this.optionKey = optionKey;
     }
 
@@ -23,8 +23,8 @@ public class Answer {
         this.surveyID = surveyID;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserName(String username) {
+        this.username = username;
     }
 
     public void setOptionKey(String optionKey) {
@@ -36,7 +36,7 @@ public class Answer {
     }
 
     public String getUserName() {
-        return userName;
+        return username;
     }
 
     public String getOptionKey() {

@@ -37,7 +37,10 @@ public class UserService implements UserDetailsService {
     private static final String USER_IS_ALREADY_VERIFIED = "error.user-is-already-verified";
     private static final String USER_EMAIL_IS_NOT_VERIFIED = "error.user-email-is-not-verified";
     private static final String NEW_PASSWORD_DOES_NOT_MATCH = "error.password-does-not-match";
+    private static final String NEW_PASSWORD_SAME = "error.password-is-the-same-as-new-password";
     private static final String USERNAME_ADMIN_CANNOT_BE_TAKEN= "error.username-admin";
+    private static final String THE_SAME_PASSWORD= "error.passwords-the-same";
+
 
     @Value("${spring.token.expired.time}")
     private long tokenExpiredTime;
@@ -81,15 +84,17 @@ public class UserService implements UserDetailsService {
         return new User(user.getUsername(),user.getPassword(),roles);
     }
 
-    public CustomUser save(CustomUserDTO user) {
-
+    public CustomUser save(CustomUserDTO user,boolean fromAdmin) {
+        if(user.getUsername().equals("admin")||user.getUsername().equals("ADMIN")){
+            throw new BadRequestException(messageSource.getMessage(USERNAME_ADMIN_CANNOT_BE_TAKEN));
+        }
         if (userRepository.findByUsername(user.getUsername()) == null) {
             CustomUser newUser = new CustomUser();
             newUser.setUsername(user.getUsername());
             newUser.setPassword(passwordEncoder.encode(user.getPassword()));
             newUser.setRole(UserRole.BASIC.name());
             newUser.setEmail(user.getEmail());
-            newUser.setVerified(false);
+            newUser.setVerified(fromAdmin);
             return userRepository.save(newUser);
         }
         else{
@@ -98,11 +103,8 @@ public class UserService implements UserDetailsService {
     }
 
     public String registerUser(HttpServletRequest request, CustomUserDTO user) {
-        if(user.getUsername().equals("admin")||user.getUsername().equals("ADMIN")){
-            throw new BadRequestException(messageSource.getMessage(USERNAME_ADMIN_CANNOT_BE_TAKEN));
-        }
-        this.save(user);
-        emailService.sendEmail(request,user.getUsername());
+        this.save(user,false);
+        emailService.sendEmail(request,user.getUsername(),user.getEmail());
         return messageSource.getMessage(EMAIL_IS_SENT);
     }
 
@@ -113,7 +115,6 @@ public class UserService implements UserDetailsService {
                 return messageSource.getMessage(USER_IS_ALREADY_VERIFIED);
             }
             String userID = customUser.getUserID();
-            String username = customToken.getUsername();
             Date nw = new Date();
             long milliseconds = nw.getTime();
             if ((milliseconds - customToken.getTimestamp())>tokenExpiredTime){
@@ -131,10 +132,16 @@ public class UserService implements UserDetailsService {
     public String changePassword(ChangePasswordRequest changePasswordRequest){
         CustomUser customUser = userRepository.findByUsername(changePasswordRequest.getUsername());
         if(customUser!=null){
+            if(changePasswordRequest.getOldPassword().equals(changePasswordRequest.getNewPassword())){
+                return messageSource.getMessage(THE_SAME_PASSWORD);
+            }
             if(!customUser.getVerified()){
                 return messageSource.getMessage(USER_EMAIL_IS_NOT_VERIFIED);
             }
-            if(changePasswordRequest.getOldPassword().equals(customUser.getPassword())){
+            if(passwordEncoder.matches(changePasswordRequest.getNewPassword(), customUser.getPassword())){
+                throw new BadRequestException(messageSource.getMessage(NEW_PASSWORD_SAME));
+            }
+            if(passwordEncoder.matches(changePasswordRequest.getOldPassword(), customUser.getPassword())){
                 customUser.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
                 userRepository.save(customUser);
             }else{
@@ -143,6 +150,6 @@ public class UserService implements UserDetailsService {
         }else{
             throw new BadRequestException(messageSource.getMessage(USER_NOT_FOUND));
         }
-        return "";
+        return "You have changed your password";
     }
 }

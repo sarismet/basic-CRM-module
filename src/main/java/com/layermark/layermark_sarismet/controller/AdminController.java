@@ -1,18 +1,16 @@
 package com.layermark.layermark_sarismet.controller;
 
-import com.layermark.layermark_sarismet.model.Answer;
 import com.layermark.layermark_sarismet.model.CustomUserDTO;
 import com.layermark.layermark_sarismet.model.NotVerifiedSurvey;
 import com.layermark.layermark_sarismet.model.Survey;
-import com.layermark.layermark_sarismet.security.JWTUtility;
+import com.layermark.layermark_sarismet.model.VerifySurveyRequest;
 import com.layermark.layermark_sarismet.service.AnswerService;
 import com.layermark.layermark_sarismet.service.SurveyService;
 import com.layermark.layermark_sarismet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.authentication.AuthenticationManager;
-
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -20,21 +18,9 @@ import java.util.List;
 
 public class AdminController {
 
-    private JWTUtility jwtUtility;
-    private AuthenticationManager authenticationManager;
     private SurveyService surveyService;
     private UserService userService;
     private AnswerService answerService;
-
-    @Autowired
-    public void setJwtUtility(JWTUtility jwtUtility) {
-        this.jwtUtility = jwtUtility;
-    }
-
-    @Autowired
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
 
     @Autowired
     public void setSurveyService(SurveyService surveyService) {
@@ -56,9 +42,9 @@ public class AdminController {
         return surveyService.createSurvey(a);
     }
 
-    @PostMapping("/create_users")
-    public ResponseEntity<?>  createUsers(@RequestBody CustomUserDTO user){
-        return ResponseEntity.ok(userService.save(user));
+    @PostMapping("/create_user")
+    public ResponseEntity<?>  createUser(@RequestBody CustomUserDTO user){
+        return ResponseEntity.ok(userService.save(user,true));
     }
 
     @GetMapping("/get_all_not_verified_surveys")
@@ -66,9 +52,14 @@ public class AdminController {
         return  surveyService.getNotVerifiedSurveys();
     }
 
-    @PutMapping("/verify_not_verified_survey/id={_id}")
-    public Survey verifyNotVerifiedSurvey(@PathVariable("_id") String id){
-        return surveyService.verifyNotVerifiedSurvey(id);
+    @GetMapping("/get_all_not_verified_surveys_by_id/id={_id}")
+    public NotVerifiedSurvey getAllNotVerifiedSurvey(@PathVariable("_id") String id){
+        return surveyService.getNotVerifiedSurveyById(id);
+    }
+
+    @PutMapping("/verify_not_verified_survey")
+    public Survey verifyNotVerifiedSurvey(@RequestBody VerifySurveyRequest verifySurveyRequest){
+        return surveyService.verifyNotVerifiedSurvey(verifySurveyRequest.getId());
     }
 
     @PutMapping("/update_survey/id={_id}")
@@ -79,11 +70,13 @@ public class AdminController {
     @DeleteMapping("/delete_survey/id={_id}")
     public String deleteSurveyById(@PathVariable("_id") String id){
         surveyService.deleteSurvey(id);
+        // We do not check here if the the survey is actually deleted or not.
+        // We could connect to database and run findbyid command one more time to see or change our repository template.
         return String.format("Survey with id %s is deleted",id);
     }
 
     @GetMapping("/get_survey_results")
-    public List<Answer> getResults(){
+    public HashMap<String, HashMap<String, Integer>> getResults(){
         return answerService.analyzeAnswers();
     }
 

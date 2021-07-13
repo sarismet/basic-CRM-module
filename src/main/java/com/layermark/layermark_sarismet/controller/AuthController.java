@@ -91,7 +91,7 @@ public class AuthController {
 
     @GetMapping("/home")
     public String hello(HttpServletRequest request){
-        return "hello from server side!";
+        return "hello from server side. Version 1.0.1!";
     }
 
 }

@@ -48,7 +48,6 @@ public class CryptoService {
 
     public CustomToken decryptText(String text){
         CustomToken customToken = null;
-
         try{
             if(this.aesKey!=null&&this.cipher!=null){
                 Gson gson = new Gson();

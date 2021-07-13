@@ -43,8 +43,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 username = jwtTokenUtil.getUsernameFromToken(jwtToken);
             } catch (IllegalArgumentException e) {
                 System.out.println("Unable to get JWT Token");
+                response.sendError(HttpStatus.BAD_REQUEST.value());
             } catch (ExpiredJwtException e) {
                 System.out.println("JWT Token has expired");
+                response.sendError(HttpStatus.BAD_REQUEST.value());
             }
         } else {
             logger.warn("JWT Token does not begin with Bearer String");
@@ -54,6 +56,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             if (request.getRequestURI().contains("/api/admin/")) {
                 boolean isAdminCheck = false;
                 for (GrantedAuthority ga : userDetails.getAuthorities()) {
+                    System.out.println("GO GO GOI "+ga.getAuthority());
                     if (ga.getAuthority().equals("ROLE_ADMIN")){
                         isAdminCheck = true;
                         break;
@@ -61,7 +64,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
                 if (!isAdminCheck) {
                     response.sendError(HttpStatus.UNAUTHORIZED.value());
-                    return;
                 }
             }
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {

@@ -1,5 +1,6 @@
 package com.layermark.layermark_sarismet.service;
 
+import com.layermark.layermark_sarismet.exception.bad_request.BadRequestException;
 import com.layermark.layermark_sarismet.exception.not_found.ResourceNotFoundException;
 import com.layermark.layermark_sarismet.generic.CustomMessageSource;
 import com.layermark.layermark_sarismet.model.NotVerifiedSurvey;
@@ -16,11 +17,11 @@ import java.util.Optional;
 public class SurveyService {
     private SurveyRepository surveyRepository;
     private NotVerifiedSurveyRepository notVerifiedSurveyRepository;
-    private UserService userService;
     private CustomMessageSource messageSource;
 
     private static final String SURVEY_IS_ANSWERED_UPDATE_NOT_ALLOWED = "error.survey.answered.update.not.allowed";
     private static final String SURVEY_DOES_NOT_EXIST = "error.survey.id-miss-match";
+    private static final String SURVEY_WITH_THAT_TOPIC_EXISTS = "error.survey.topic-present";
 
     @Autowired
     public void setMessageSource(CustomMessageSource messageSource) {
@@ -34,16 +35,18 @@ public class SurveyService {
     public void setNotVerifiedSurveyRepository(NotVerifiedSurveyRepository notVerifiedSurveyRepository) {
         this.notVerifiedSurveyRepository = notVerifiedSurveyRepository;
     }
-    @Autowired
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
 
     public Survey createSurvey(Survey survey) {
+        if(surveyRepository.findByTopic(survey.getTopic())!=null){
+            throw new BadRequestException(messageSource.getMessage(SURVEY_WITH_THAT_TOPIC_EXISTS));
+        }
         return surveyRepository.insert(survey);
     }
 
     public NotVerifiedSurvey createNotVerifiedSurvey(NotVerifiedSurvey notVerifiedSurvey) {
+        if(notVerifiedSurveyRepository.findByTopic(notVerifiedSurvey.getTopic())!=null){
+            throw new BadRequestException(messageSource.getMessage(SURVEY_WITH_THAT_TOPIC_EXISTS));
+        }
         return notVerifiedSurveyRepository.insert(notVerifiedSurvey);
     }
 
@@ -51,12 +54,17 @@ public class SurveyService {
         return notVerifiedSurveyRepository.findAll();
     }
 
-    public Optional<NotVerifiedSurvey> getNotVerifiedSurveyById(String id) {
-        return notVerifiedSurveyRepository.findById(id);
+    public NotVerifiedSurvey getNotVerifiedSurveyById(String id) {
+        NotVerifiedSurvey NotVerifiedSurvey = notVerifiedSurveyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
+        return NotVerifiedSurvey;
     }
 
     public Survey verifyNotVerifiedSurvey(String id) {
         NotVerifiedSurvey notVerifiedSurvey = notVerifiedSurveyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage(SURVEY_DOES_NOT_EXIST)));
+        System.out.println("notVerifiedSurvey.getTopic()   "+notVerifiedSurvey.getTopic());
+        if(surveyRepository.findByTopic(notVerifiedSurvey.getTopic())!=null){
+            throw new BadRequestException(messageSource.getMessage(SURVEY_WITH_THAT_TOPIC_EXISTS));
+        }
         Survey survey = surveyRepository.save(notVerifiedSurvey);
         notVerifiedSurveyRepository.deleteById(id);
         return survey;
